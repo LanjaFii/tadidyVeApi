@@ -1,0 +1,6 @@
+@tadidyVeApi_HostAddress = http://localhost:5223
+
+GET {{tadidyVeApi_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
