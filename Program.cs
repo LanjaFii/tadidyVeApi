@@ -3,6 +3,9 @@ using TadidyVeApi.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Ajoute les services nécessaires pour les controllers
+builder.Services.AddControllers();
+
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -41,6 +44,10 @@ app.MapGet("/weatherforecast", () =>
 })
 .WithName("GetWeatherForecast")
 .WithOpenApi();
+
+// **Mapper les controllers**
+app.MapControllers();
+
 
 app.Run();
 
