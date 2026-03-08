@@ -1,0 +1,75 @@
+instructions.txt
+
+# ========================================
+# .NET build files
+# ========================================
+bin/
+obj/
+**/bin/
+**/obj/
+
+# ========================================
+# User-specific files
+# ========================================
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.vs/
+
+# ========================================
+# Visual Studio / JetBrains / IDE
+# ========================================
+.vscode/
+.idea/
+
+# ========================================
+# EF Core Migrations (optionnel)
+# ========================================
+# Si tu veux versionner les migrations, laisse le dossier Migrations
+# Sinon ignore-le :
+# Migrations/
+
+# ========================================
+# NuGet
+# ========================================
+*.nupkg
+*.snupkg
+.nuget/
+packages/
+# Cache global de NuGet
+~/.nuget/packages/
+
+# ========================================
+# Docker
+# ========================================
+# Images, conteneurs et volumes locaux
+docker-compose.override.yml
+**/docker-compose.override.yml
+**/Dockerfile.build
+*.env  # fichiers d'environnement sensibles
+
+# ========================================
+# Logs / Temp files
+# ========================================
+*.log
+*.tmp
+*.temp
+*.pid
+*.seed
+
+# ========================================
+# PostgreSQL / Database
+# ========================================
+*.mdf
+*.ldf
+*.sqlite
+*.db
+*.bak
+
+# ========================================
+# OS / System files
+# ========================================
+.DS_Store
+Thumbs.db
+desktop.ini
