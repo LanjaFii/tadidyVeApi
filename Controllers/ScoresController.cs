@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using TadidyVeApi.Data;
 using TadidyVeApi.Models;
 using TadidyVeApi.Dtos;
@@ -8,6 +9,7 @@ namespace TadidyVeApi.Controllers;
 
 [ApiController]
 [Route("scores")]
+[Authorize]
 public class ScoresController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -17,13 +19,11 @@ public class ScoresController : ControllerBase
         _context = context;
     }
 
-    // POST /scores
     [HttpPost]
     public async Task<ActionResult<ScoreResponseDto>> AddScore([FromBody] AddScoreDto dto)
     {
         var player = await _context.Players.FindAsync(dto.PlayerId);
-        if (player == null)
-            return NotFound("Joueur non trouvé");
+        if (player == null) return NotFound("Joueur non trouvé");
 
         var score = new Score
         {
@@ -33,7 +33,6 @@ public class ScoresController : ControllerBase
 
         _context.Scores.Add(score);
 
-        // Mettre à jour le BestScore du joueur si nécessaire
         if (dto.Value > player.BestScore)
             player.BestScore = dto.Value;
 
@@ -50,13 +49,11 @@ public class ScoresController : ControllerBase
         return CreatedAtAction(nameof(GetScoresByPlayer), new { playerId = dto.PlayerId }, response);
     }
 
-    // GET /scores/{playerId}
     [HttpGet("{playerId}")]
     public async Task<ActionResult<IEnumerable<ScoreResponseDto>>> GetScoresByPlayer(int playerId)
     {
         var player = await _context.Players.FindAsync(playerId);
-        if (player == null)
-            return NotFound("Joueur non trouvé");
+        if (player == null) return NotFound("Joueur non trouvé");
 
         var scores = await _context.Scores
             .Where(s => s.PlayerId == playerId)
@@ -73,7 +70,6 @@ public class ScoresController : ControllerBase
         return Ok(scores);
     }
 
-    // GET /scores/top
     [HttpGet("top")]
     public async Task<ActionResult<IEnumerable<PlayerResponseDto>>> GetLeaderboard([FromQuery] int limit = 10)
     {

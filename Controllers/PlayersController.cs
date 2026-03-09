@@ -1,13 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 using TadidyVeApi.Data;
 using TadidyVeApi.Models;
-using TadidyVeApi.Dtos; // <- utiliser les DTOs centralisés
+using TadidyVeApi.Dtos;
 
 namespace TadidyVeApi.Controllers;
 
 [ApiController]
 [Route("players")]
+[Authorize] // <- tous les endpoints nécessitent JWT
 public class PlayersController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -32,7 +34,6 @@ public class PlayersController : ControllerBase
                 CreatedAt = p.CreatedAt
             })
             .ToListAsync();
-
         return Ok(players);
     }
 
@@ -66,7 +67,6 @@ public class PlayersController : ControllerBase
 
         if (!string.IsNullOrEmpty(dto.Bio))
             player.Bio = dto.Bio;
-
         if (!string.IsNullOrEmpty(dto.ProfilePicture))
             player.ProfilePicture = dto.ProfilePicture;
 

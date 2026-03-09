@@ -2,7 +2,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TadidyVeApi.Data;
 using TadidyVeApi.Models;
-using TadidyVeApi.Dtos; // <- utiliser le DTO centralisé
+using TadidyVeApi.Dtos;
+using System.IdentityModel.Tokens.Jwt;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using System.Security.Claims;
 using BCrypt.Net;
 
 namespace TadidyVeApi.Controllers;
@@ -12,10 +16,12 @@ namespace TadidyVeApi.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IConfiguration _config;
 
-    public AuthController(AppDbContext context)
+    public AuthController(AppDbContext context, IConfiguration config)
     {
         _context = context;
+        _config = config;
     }
 
     // POST /auth/register
@@ -23,9 +29,7 @@ public class AuthController : ControllerBase
     public async Task<ActionResult<PlayerResponseDto>> Register([FromBody] RegisterDto dto)
     {
         if (await _context.Players.AnyAsync(p => p.Username == dto.Username))
-        {
             return BadRequest("Nom d'utilisateur déjà utilisé");
-        }
 
         var player = new Player
         {
@@ -57,28 +61,30 @@ public class AuthController : ControllerBase
     public async Task<ActionResult> Login([FromBody] LoginDto dto)
     {
         var player = await _context.Players.FirstOrDefaultAsync(p => p.Username == dto.Username);
-
-        if (player == null)
-            return Unauthorized("Utilisateur non trouvé");
-
+        if (player == null) return Unauthorized("Utilisateur non trouvé");
         if (!BCrypt.Net.BCrypt.Verify(dto.Password, player.PasswordHash))
             return Unauthorized("Mot de passe incorrect");
 
-        return Ok(new { message = "Connecté !" });
+        // Générer JWT
+        var tokenHandler = new JwtSecurityTokenHandler();
+        var key = Encoding.ASCII.GetBytes(_config["Jwt:Key"]);
+
+        var tokenDescriptor = new SecurityTokenDescriptor
+        {
+            Subject = new ClaimsIdentity(new[]
+            {
+                new Claim("id", player.Id.ToString()),
+                new Claim("username", player.Username)
+            }),
+            Expires = DateTime.UtcNow.AddHours(5),
+            Issuer = _config["Jwt:Issuer"],
+            Audience = _config["Jwt:Audience"],
+            SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+        };
+
+        var token = tokenHandler.CreateToken(tokenDescriptor);
+        var jwt = tokenHandler.WriteToken(token);
+
+        return Ok(new { token = jwt });
     }
-}
-
-// DTOs internes pour AuthController
-public class RegisterDto
-{
-    public string Username { get; set; } = "";
-    public string Password { get; set; } = "";
-    public string Bio { get; set; } = "";
-    public string ProfilePicture { get; set; } = "";
-}
-
-public class LoginDto
-{
-    public string Username { get; set; } = "";
-    public string Password { get; set; } = "";
 }
