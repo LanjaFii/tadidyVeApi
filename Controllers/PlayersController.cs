@@ -1,8 +1,8 @@
-// Controllers/PlayersController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TadidyVeApi.Data;
 using TadidyVeApi.Models;
+using TadidyVeApi.Dtos; // <- utiliser les DTOs centralisés
 
 namespace TadidyVeApi.Controllers;
 
@@ -19,17 +19,67 @@ public class PlayersController : ControllerBase
 
     // GET /players
     [HttpGet]
-    public async Task<ActionResult<IEnumerable<Player>>> GetPlayers()
+    public async Task<ActionResult<IEnumerable<PlayerResponseDto>>> GetAllPlayers()
     {
-        return await _context.Players.ToListAsync();
+        var players = await _context.Players
+            .Select(p => new PlayerResponseDto
+            {
+                Id = p.Id,
+                Username = p.Username,
+                Bio = p.Bio,
+                ProfilePicture = p.ProfilePicture,
+                BestScore = p.BestScore,
+                CreatedAt = p.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(players);
     }
 
-    // Ajoute dans PlayersController
-    [HttpPost("register")]
-    public async Task<ActionResult<Player>> Register([FromBody] Player player)
+    // GET /players/{id}
+    [HttpGet("{id}")]
+    public async Task<ActionResult<PlayerResponseDto>> GetPlayer(int id)
     {
-        _context.Players.Add(player);
+        var player = await _context.Players
+            .Where(p => p.Id == id)
+            .Select(p => new PlayerResponseDto
+            {
+                Id = p.Id,
+                Username = p.Username,
+                Bio = p.Bio,
+                ProfilePicture = p.ProfilePicture,
+                BestScore = p.BestScore,
+                CreatedAt = p.CreatedAt
+            })
+            .FirstOrDefaultAsync();
+
+        if (player == null) return NotFound("Joueur non trouvé");
+        return Ok(player);
+    }
+
+    // PATCH /players/{id}
+    [HttpPatch("{id}")]
+    public async Task<ActionResult<PlayerResponseDto>> UpdatePlayer(int id, [FromBody] UpdatePlayerDto dto)
+    {
+        var player = await _context.Players.FindAsync(id);
+        if (player == null) return NotFound("Joueur non trouvé");
+
+        if (!string.IsNullOrEmpty(dto.Bio))
+            player.Bio = dto.Bio;
+
+        if (!string.IsNullOrEmpty(dto.ProfilePicture))
+            player.ProfilePicture = dto.ProfilePicture;
+
         await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetPlayers), new { id = player.Id }, player);
+
+        return Ok(new PlayerResponseDto
+        {
+            Id = player.Id,
+            Username = player.Username,
+            Bio = player.Bio,
+            ProfilePicture = player.ProfilePicture,
+            BestScore = player.BestScore,
+            CreatedAt = player.CreatedAt
+        });
     }
 }

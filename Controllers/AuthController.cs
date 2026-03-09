@@ -1,8 +1,8 @@
-// Controllers/AuthController.cs
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TadidyVeApi.Data;
 using TadidyVeApi.Models;
+using TadidyVeApi.Dtos; // <- utiliser le DTO centralisé
 using BCrypt.Net;
 
 namespace TadidyVeApi.Controllers;
@@ -22,7 +22,6 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<ActionResult<PlayerResponseDto>> Register([FromBody] RegisterDto dto)
     {
-        // Vérifier si le username existe déjà
         if (await _context.Players.AnyAsync(p => p.Username == dto.Username))
         {
             return BadRequest("Nom d'utilisateur déjà utilisé");
@@ -40,7 +39,6 @@ public class AuthController : ControllerBase
         _context.Players.Add(player);
         await _context.SaveChangesAsync();
 
-        // Ne pas renvoyer le PasswordHash dans la réponse
         var response = new PlayerResponseDto
         {
             Id = player.Id,
@@ -66,12 +64,11 @@ public class AuthController : ControllerBase
         if (!BCrypt.Net.BCrypt.Verify(dto.Password, player.PasswordHash))
             return Unauthorized("Mot de passe incorrect");
 
-        // Ici tu peux ajouter un JWT plus tard
         return Ok(new { message = "Connecté !" });
     }
 }
 
-// DTOs
+// DTOs internes pour AuthController
 public class RegisterDto
 {
     public string Username { get; set; } = "";
@@ -84,15 +81,4 @@ public class LoginDto
 {
     public string Username { get; set; } = "";
     public string Password { get; set; } = "";
-}
-
-// DTO pour renvoyer le joueur sans PasswordHash
-public class PlayerResponseDto
-{
-    public int Id { get; set; }
-    public string Username { get; set; } = "";
-    public string Bio { get; set; } = "";
-    public string ProfilePicture { get; set; } = "";
-    public int BestScore { get; set; }
-    public DateTime CreatedAt { get; set; }
 }
