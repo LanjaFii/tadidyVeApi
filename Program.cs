@@ -59,4 +59,15 @@ app.UseAuthorization();
 
 app.MapControllers();
 
+// Use PORT env variable if available (Railway)
+var port = Environment.GetEnvironmentVariable("PORT") ?? "5223";
+app.Urls.Add($"http://*:{port}");
+
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    db.Database.Migrate(); // Nécessite 'using Microsoft.EntityFrameworkCore;'
+}
+
 app.Run();

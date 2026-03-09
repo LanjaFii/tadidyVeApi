@@ -1,0 +1,29 @@
+services:
+  tadidyveapi:
+    container_name: tadidyve-api
+    build: .
+    ports:
+      - "5223:5223"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      # On utilise une syntaxe qui permet de surcharger facilement en prod
+      - ConnectionStrings__DefaultConnection=${DATABASE_URL:-Host=db;Port=5432;Database=tadidyvedb;Username=tadidy;Password=secret}
+    depends_on:
+      - db
+
+  db:
+    container_name: tadidyve-db
+    image: postgres:16
+    environment:
+      POSTGRES_USER: tadidy
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: tadidyvedb
+    # Pas besoin d'exposer le port 5432 en prod, 
+    # mais on le garde pour tes outils locaux (DBeaver, etc.)
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

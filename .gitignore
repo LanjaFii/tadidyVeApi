@@ -5,6 +5,8 @@ instructions.txt
 # ========================================
 bin/
 obj/
+[Bb]in/
+[Oo]bj/
 **/bin/
 **/obj/
 
@@ -20,6 +22,7 @@ obj/
 # ========================================
 # Visual Studio / JetBrains / IDE
 # ========================================
+.vs/
 .vscode/
 .idea/
 
@@ -73,3 +76,9 @@ docker-compose.override.yml
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# ========================================
+# Autres
+# ========================================
+appsettings.Development.json
+instructions.txt
