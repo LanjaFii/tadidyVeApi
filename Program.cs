@@ -44,6 +44,15 @@ builder.Services.AddAuthentication(options =>
 
 var app = builder.Build();
 
+if (app.Environment.IsProduction())
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        db.Database.Migrate();
+    }
+}
+
 // Middleware
 if (app.Environment.IsDevelopment())
 {
@@ -59,15 +68,14 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-// Use PORT env variable if available (Railway)
+// 1. Définir le port proprement
 var port = Environment.GetEnvironmentVariable("PORT") ?? "5223";
-app.Urls.Add($"http://*:{port}");
 
-
+// 2. Appliquer les migrations au démarrage (une seule fois suffit)
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    db.Database.Migrate(); // Nécessite 'using Microsoft.EntityFrameworkCore;'
+    db.Database.Migrate();
 }
 
-app.Run();
+app.Run(); // .NET utilisera automatiquement le port configuré via la variable d'env dans le Dockerfile
