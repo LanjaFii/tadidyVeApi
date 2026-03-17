@@ -22,12 +22,14 @@ public class ScoresController : ControllerBase
     [HttpPost]
     public async Task<ActionResult<ScoreResponseDto>> AddScore([FromBody] AddScoreDto dto)
     {
-        var player = await _context.Players.FindAsync(dto.PlayerId);
+        var playerId = int.Parse(User.FindFirst("id")!.Value);
+
+        var player = await _context.Players.FindAsync(playerId);
         if (player == null) return NotFound("Joueur non trouvé");
 
         var score = new Score
         {
-            PlayerId = dto.PlayerId,
+            PlayerId = playerId,
             Value = dto.Value
         };
 
@@ -46,7 +48,7 @@ public class ScoresController : ControllerBase
             CreatedAt = score.CreatedAt
         };
 
-        return CreatedAtAction(nameof(GetScoresByPlayer), new { playerId = dto.PlayerId }, response);
+        return CreatedAtAction(nameof(GetScoresByPlayer), new { playerId }, response);
     }
 
     [HttpGet("{playerId}")]

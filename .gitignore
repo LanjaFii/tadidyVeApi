@@ -1,5 +1,3 @@
-instructions.txt
-
 # ========================================
 # .NET build files
 # ========================================
@@ -20,7 +18,7 @@ obj/
 *.vs/
 
 # ========================================
-# Visual Studio / JetBrains / IDE
+# IDE / Editor
 # ========================================
 .vs/
 .vscode/
@@ -29,8 +27,7 @@ obj/
 # ========================================
 # EF Core Migrations (optionnel)
 # ========================================
-# Si tu veux versionner les migrations, laisse le dossier Migrations
-# Sinon ignore-le :
+# Versionner si tu veux suivre les migrations, sinon ignore-les
 # Migrations/
 
 # ========================================
@@ -46,11 +43,11 @@ packages/
 # ========================================
 # Docker
 # ========================================
-# Images, conteneurs et volumes locaux
 docker-compose.override.yml
 **/docker-compose.override.yml
 **/Dockerfile.build
 *.env  # fichiers d'environnement sensibles
+**/tadidyveapi_pgdata/  # volume PostgreSQL local
 
 # ========================================
 # Logs / Temp files
@@ -62,12 +59,14 @@ docker-compose.override.yml
 *.seed
 
 # ========================================
-# PostgreSQL / Database
+# Database / SQLite
 # ========================================
 *.mdf
 *.ldf
 *.sqlite
 *.db
+*.db-shm
+*.db-wal
 *.bak
 
 # ========================================
@@ -78,7 +77,10 @@ Thumbs.db
 desktop.ini
 
 # ========================================
-# Autres
+# Local configuration files
 # ========================================
 appsettings.Development.json
+appsettings.Local.json
+Properties/launchSettings.json
+Properties/launchSettings.local.json
 instructions.txt
